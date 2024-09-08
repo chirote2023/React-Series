@@ -1,48 +1,38 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import React, { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import './App.css'
+import authService from "./appwrite/auth"
+import {login, logout} from "./store/authSlice"
+import { Footer, Header } from './components'
+import { Outlet } from 'react-router-dom'
 
 function App() {
-  let [counter, setCounter] = useState(0);
+  const [loading, setLoading] = useState(true)
+  const dispatch = useDispatch()
 
-  // let counter = 10
-  const Addvalue = () => {
-    if( counter == 20){
-      setCounter(counter = 20)
-    }
-    else{
-      setCounter(counter + 1)
-    }
-   // setCounter(prevCounter => prevCounter + 1)
-   // setCounter(prevCounter => prevCounter + 1)
-   // setCounter(prevCounter => prevCounter + 1)
-   // setCounter(prevCounter => prevCounter + 1)
-    
-    // console.log("Clicked", counter);
-    // counter = counter + 1;
-    // setCounter(counter);
-  };
-
-  const Removevalue = () => {
-    if(counter > 0){
-      setCounter(counter - 1)
-    }else{
-      setCounter(counter = 0);
-    }
-   
-  };
-
-  return (
-    <>
-      <h1> Learn React </h1>
-      <h2>Learn Hooks and States {counter} </h2>
-      <button onClick={Addvalue}>Add count {counter} </button>
-      <br />
-      <button onClick={Removevalue}>Remove count</button>
-      <p>Footer : {counter}</p>
-    </>
-  );
+  useEffect(() => {
+    authService.getCurrentUser()
+    .then((userData) => {
+      if (userData) {
+        dispatch(login({userData}))
+      } else {
+        dispatch(logout())
+      }
+    })
+    .finally(() => setLoading(false))
+  }, [])
+  
+  return !loading ? (
+    <div className='min-h-screen flex flex-wrap content-between bg-gray-400'>
+      <div className='w-full block'>
+        <Header />
+        <main>
+        TODO:  <Outlet />
+        </main>
+        <Footer />
+      </div>
+    </div>
+  ) : null
 }
 
-export default App;
+export default App
